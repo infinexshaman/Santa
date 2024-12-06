@@ -152,10 +152,10 @@
                 hat.onload = () => {
                     const rect = santaHat.getBoundingClientRect();
                     const editorRect = editor.getBoundingClientRect();
-                    const x = rect.left - editorRect.left;
-                    const y = rect.top - editorRect.top;
-                    const width = rect.width;
-                    const height = rect.height;
+                    const x = Math.max(0, rect.left - editorRect.left);
+                    const y = Math.max(0, rect.top - editorRect.top);
+                    const width = Math.min(rect.width, canvas.width - x);
+                    const height = Math.min(rect.height, canvas.height - y);
                     ctx.translate(x + width / 2, y + height / 2);
                     ctx.rotate((rotateSlider.value * Math.PI) / 180);
                     ctx.scale(sizeSlider.value, sizeSlider.value);
