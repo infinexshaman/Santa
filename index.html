@@ -193,10 +193,12 @@
 
                 const rect = santaHat.getBoundingClientRect();
                 const editorRect = editor.getBoundingClientRect();
-                const hatX = rect.left - editorRect.left;
-                const hatY = rect.top - editorRect.top;
-                const hatWidth = rect.width * (canvas.width / editorRect.width);
-                const hatHeight = rect.height * (canvas.height / editorRect.height);
+                const scaleX = canvas.width / editorRect.width;
+                const scaleY = canvas.height / editorRect.height;
+                const hatX = (rect.left - editorRect.left) * scaleX;
+                const hatY = (rect.top - editorRect.top) * scaleY;
+                const hatWidth = rect.width * scaleX;
+                const hatHeight = rect.height * scaleY;
 
                 ctx.save();
                 ctx.translate(hatX + hatWidth / 2, hatY + hatHeight / 2);
