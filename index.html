@@ -4,7 +4,7 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Santa Hat Profile Picture Edior</title>
+    <title>Santa Hat Profile Picture Editor</title>
     <style>
         body {
             font-family: 'IBM Plex Sans', sans-serif;
@@ -42,7 +42,7 @@
     </style>
 </head>
 <body>
-    <h2 style="text-align:center;">Add a Santa Hat to Your Profile Picture!</h2>
+    <h2 style="text-align:center;">Add a Santa Hat to Your Profile Pictur!</h2>
     <input type="file" id="imageUpload" accept="image/*">
     <div id="editor">
         <img id="santaHat" src="santa_hat.png" alt="Santa Hat">
@@ -147,26 +147,23 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                const hat = new Image();
-                hat.src = santaHat.src;
-                hat.onload = () => {
-                    const rect = santaHat.getBoundingClientRect();
-                    const editorRect = editor.getBoundingClientRect();
-                    const x = Math.max(0, rect.left - editorRect.left);
-                    const y = Math.max(0, rect.top - editorRect.top);
-                    const width = Math.min(rect.width, canvas.width - x);
-                    const height = Math.min(rect.height, canvas.height - y);
-                    ctx.translate(x + width / 2, y + height / 2);
-                    ctx.rotate((rotateSlider.value * Math.PI) / 180);
-                    ctx.scale(sizeSlider.value, sizeSlider.value);
-                    ctx.drawImage(hat, -width / 2, -height / 2, width, height);
-                    ctx.resetTransform();
+                const rect = santaHat.getBoundingClientRect();
+                const editorRect = editor.getBoundingClientRect();
+                const hatX = rect.left - editorRect.left;
+                const hatY = rect.top - editorRect.top;
+                const hatWidth = rect.width;
+                const hatHeight = rect.height;
 
-                    const link = document.createElement('a');
-                    link.download = 'profile_with_santa_hat.png';
-                    link.href = canvas.toDataURL();
-                    link.click();
-                };
+                ctx.save();
+                ctx.translate(hatX + hatWidth / 2, hatY + hatHeight / 2);
+                ctx.rotate((rotateSlider.value * Math.PI) / 180);
+                ctx.drawImage(santaHat, -hatWidth / 2, -hatHeight / 2, hatWidth, hatHeight);
+                ctx.restore();
+
+                const link = document.createElement('a');
+                link.download = 'profile_with_santa_hat.png';
+                link.href = canvas.toDataURL();
+                link.click();
             };
             img.src = imageURL;
         });
