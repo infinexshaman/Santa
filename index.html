@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santa Hat Profile Picture Editor</title>
+    <style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background-color: #18191D;
+            color: #EDEEF0;
+        }
+        #editor {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 1px solid #ccc;
+            margin: 20px auto;
+            background-size: cover;
+        }
+        #santaHat {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            cursor: move;
+            transform-origin: center;
+            transform: translate(-50%, -50%) rotate(0deg) scale(1);
+        }
+        input[type='file'] {
+            display: block;
+            margin: 20px auto;
+            background-color: #FE6F39;
+            color: #18191D;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #controls {
+            text-align: center;
+            margin: 20px;
+            width: 100%;
+        }
+        .slider {
+            width: 80%;
+            margin: 10px auto;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: #FE6F39;
+            outline: none;
+            opacity: 0.9;
+            border-radius: 5px;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #EDEEF0;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #EDEEF0;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
+            background-color: #FE6F39;
+            color: #18191D;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center;">Add a Santa Hat to Your Profile Picture!</h2>
+    <input type="file" id="imageUpload" accept="image/*">
+    <div id="editor">
+        <img id="santaHat" src="santa_hat.png" alt="Santa Hat">
+    </div>
+    <div id="controls">
+        <label for="rotateSlider">Rotate:</label>
+        <input type="range" id="rotateSlider" class="slider" min="-180" max="180" value="0">
+        <label for="sizeSlider">Size:</label>
+        <input type="range" id="sizeSlider" class="slider" min="0.1" max="5" step="0.1" value="1">
+    </div>
+    <button id="exportBtn">Export Image</button>
+    <canvas id="canvas" width="1000" height="1000" style="display:none;"></canvas>
+
+    <script>
+        const imageUpload = document.getElementById('imageUpload');
+        const editor = document.getElementById('editor');
+        const santaHat = document.getElementById('santaHat');
+        const exportBtn = document.getElementById('exportBtn');
+        const canvas = document.getElementById('canvas');
+        const rotateSlider = document.getElementById('rotateSlider');
+        const sizeSlider = document.getElementById('sizeSlider');
+        let imageURL = '';
+
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    imageURL = event.target.result;
+                    editor.style.backgroundImage = `url(${imageURL})`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Dragging the Santa Hat (Mouse and Touch Support)
+        let isDragging = false;
+        let startX, startY;
+        const startDrag = (x, y) => {
+            isDragging = true;
+            startX = x;
+            startY = y;
+        };
+
+        const onDrag = (x, y) => {
+            if (!isDragging) return;
+            const dx = x - startX;
+            const dy = y - startY;
+            santaHat.style.left = `${santaHat.offsetLeft + dx}px`;
+            santaHat.style.top = `${santaHat.offsetTop + dy}px`;
+            startX = x;
+            startY = y;
+        };
+
+        santaHat.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                startDrag(e.clientX, e.clientY);
+            }
+        });
+
+        santaHat.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            startDrag(touch.clientX, touch.clientY);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            onDrag(e.clientX, e.clientY);
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            onDrag(touch.clientX, touch.clientY);
+            window.scrollTo(0, 0); // Prevent scrolling horizontally and vertically
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        // Rotate and Resize Sliders
+        rotateSlider.addEventListener('input', () => {
+            const angle = rotateSlider.value;
+            santaHat.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scale(${sizeSlider.value})`;
+        });
+
+        sizeSlider.addEventListener('input', () => {
+            const scale = sizeSlider.value;
+            santaHat.style.transform = `translate(-50%, -50%) rotate(${rotateSlider.value}deg) scale(${scale})`;
+        });
+
+        // Export Image
+        exportBtn.addEventListener('click', () => {
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const rect = santaHat.getBoundingClientRect();
+                const editorRect = editor.getBoundingClientRect();
+                const hatX = rect.left - editorRect.left;
+                const hatY = rect.top - editorRect.top;
+                const hatWidth = rect.width * (canvas.width / editorRect.width);
+                const hatHeight = rect.height * (canvas.height / editorRect.height);
+
+                ctx.save();
+                ctx.translate(hatX + hatWidth / 2, hatY + hatHeight / 2);
+                ctx.rotate((rotateSlider.value * Math.PI) / 180);
+                ctx.drawImage(santaHat, -hatWidth / 2, -hatHeight / 2, hatWidth, hatHeight);
+                ctx.restore();
+
+                const link = document.createElement('a');
+                link.download = 'profile_with_santa_hat.png';
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+            };
+            img.src = imageURL;
+        });
+    </script>
+</body>
+</html>
