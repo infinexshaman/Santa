@@ -121,6 +121,7 @@
             e.preventDefault();
             const touch = e.touches[0];
             onDrag(touch.clientX, touch.clientY);
+            window.scrollTo(0, 0); // Prevent scrolling horizontally and vertically
         });
 
         document.addEventListener('mouseup', () => {
