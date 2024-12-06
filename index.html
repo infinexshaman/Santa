@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santa Hat Profile Picture Editor</title>
+    <style>
+        #editor {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 1px solid #ccc;
+            margin: 20px auto;
+            background-size: cover;
+        }
+        #santaHat {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            cursor: move;
+            transform-origin: center;
+            transform: translate(-50%, -50%) rotate(0deg);
+        }
+        input[type='file'] {
+            display: block;
+            margin: 20px auto;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center;">Add a Santa Hat to Your Profile Picture!</h2>
+    <input type="file" id="imageUpload" accept="image/*">
+    <div id="editor">
+        <img id="santaHat" src="santa_hat.png" alt="Santa Hat">
+    </div>
+    <button id="exportBtn">Export Image</button>
+    <canvas id="canvas" width="300" height="300" style="display:none;"></canvas>
+
+    <script>
+        const imageUpload = document.getElementById('imageUpload');
+        const editor = document.getElementById('editor');
+        const santaHat = document.getElementById('santaHat');
+        const exportBtn = document.getElementById('exportBtn');
+        const canvas = document.getElementById('canvas');
+        let imageURL = '';
+
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    imageURL = event.target.result;
+                    editor.style.backgroundImage = `url(${imageURL})`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Dragging and Rotating the Santa Hat
+        let isDragging = false;
+        let startX, startY, initialAngle = 0;
+        santaHat.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            santaHat.style.left = `${santaHat.offsetLeft + dx}px`;
+            santaHat.style.top = `${santaHat.offsetTop + dy}px`;
+            startX = e.clientX;
+            startY = e.clientY;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Rotating with mouse wheel
+        santaHat.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            initialAngle += e.deltaY * 0.1;
+            santaHat.style.transform = `translate(-50%, -50%) rotate(${initialAngle}deg)`;
+        });
+
+        // Export Image
+        exportBtn.addEventListener('click', () => {
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const hat = new Image();
+                hat.src = santaHat.src;
+                hat.onload = () => {
+                    const rect = santaHat.getBoundingClientRect();
+                    const editorRect = editor.getBoundingClientRect();
+                    const x = rect.left - editorRect.left;
+                    const y = rect.top - editorRect.top;
+                    const width = rect.width;
+                    const height = rect.height;
+                    ctx.translate(x + width / 2, y + height / 2);
+                    ctx.rotate((initialAngle * Math.PI) / 180);
+                    ctx.drawImage(hat, -width / 2, -height / 2, width, height);
+                    ctx.resetTransform();
+
+                    const link = document.createElement('a');
+                    link.download = 'profile_with_santa_hat.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                };
+            };
+            img.src = imageURL;
+        });
+    </script>
+</body>
+</html>
