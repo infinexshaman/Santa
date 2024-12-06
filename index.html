@@ -20,7 +20,7 @@
             width: 100px;
             cursor: move;
             transform-origin: center;
-            transform: translate(-50%, -50%) rotate(0deg);
+            transform: translate(-50%, -50%) rotate(0deg) scale(1);
         }
         input[type='file'] {
             display: block;
@@ -30,6 +30,10 @@
             display: block;
             margin: 10px auto;
         }
+        #controls {
+            text-align: center;
+            margin: 20px;
+        }
     </style>
 </head>
 <body>
@@ -37,6 +41,12 @@
     <input type="file" id="imageUpload" accept="image/*">
     <div id="editor">
         <img id="santaHat" src="santa_hat.png" alt="Santa Hat">
+    </div>
+    <div id="controls">
+        <button id="rotateLeftBtn">Rotate Left</button>
+        <button id="rotateRightBtn">Rotate Right</button>
+        <button id="increaseSizeBtn">Increase Size</button>
+        <button id="decreaseSizeBtn">Decrease Size</button>
     </div>
     <button id="exportBtn">Export Image</button>
     <canvas id="canvas" width="300" height="300" style="display:none;"></canvas>
@@ -47,6 +57,10 @@
         const santaHat = document.getElementById('santaHat');
         const exportBtn = document.getElementById('exportBtn');
         const canvas = document.getElementById('canvas');
+        const rotateLeftBtn = document.getElementById('rotateLeftBtn');
+        const rotateRightBtn = document.getElementById('rotateRightBtn');
+        const increaseSizeBtn = document.getElementById('increaseSizeBtn');
+        const decreaseSizeBtn = document.getElementById('decreaseSizeBtn');
         let imageURL = '';
 
         imageUpload.addEventListener('change', (e) => {
@@ -61,13 +75,15 @@
             }
         });
 
-        // Dragging and Rotating the Santa Hat
+        // Dragging the Santa Hat
         let isDragging = false;
-        let startX, startY, initialAngle = 0;
+        let startX, startY, initialAngle = 0, initialScale = 1;
         santaHat.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
+            if (e.button === 0) {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+            }
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -84,11 +100,27 @@
             isDragging = false;
         });
 
-        // Rotating with mouse wheel
-        santaHat.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            initialAngle += e.deltaY * 0.1;
-            santaHat.style.transform = `translate(-50%, -50%) rotate(${initialAngle}deg)`;
+        // Rotate and Resize Buttons
+        rotateLeftBtn.addEventListener('click', () => {
+            initialAngle -= 10;
+            santaHat.style.transform = `translate(-50%, -50%) rotate(${initialAngle}deg) scale(${initialScale})`;
+        });
+
+        rotateRightBtn.addEventListener('click', () => {
+            initialAngle += 10;
+            santaHat.style.transform = `translate(-50%, -50%) rotate(${initialAngle}deg) scale(${initialScale})`;
+        });
+
+        increaseSizeBtn.addEventListener('click', () => {
+            initialScale += 0.1;
+            initialScale = Math.min(initialScale, 5);
+            santaHat.style.transform = `translate(-50%, -50%) rotate(${initialAngle}deg) scale(${initialScale})`;
+        });
+
+        decreaseSizeBtn.addEventListener('click', () => {
+            initialScale -= 0.1;
+            initialScale = Math.max(initialScale, 0.1);
+            santaHat.style.transform = `translate(-50%, -50%) rotate(${initialAngle}deg) scale(${initialScale})`;
         });
 
         // Export Image
@@ -110,6 +142,7 @@
                     const height = rect.height;
                     ctx.translate(x + width / 2, y + height / 2);
                     ctx.rotate((initialAngle * Math.PI) / 180);
+                    ctx.scale(initialScale, initialScale);
                     ctx.drawImage(hat, -width / 2, -height / 2, width, height);
                     ctx.resetTransform();
 
