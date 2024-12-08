@@ -205,13 +205,14 @@
                 const editorRect = editor.getBoundingClientRect();
                 const scaleX = canvas.width / editorRect.width;
                 const scaleY = canvas.height / editorRect.height;
-                const hatX = (rect.left - editorRect.left) * scaleX;
-                const hatY = (rect.top - editorRect.top) * scaleY;
+
+                const hatX = ((rect.left + rect.width / 2) - (editorRect.left + editorRect.width / 2)) * scaleX + canvas.width / 2;
+                const hatY = ((rect.top + rect.height / 2) - (editorRect.top + editorRect.height / 2)) * scaleY + canvas.height / 2;
                 const hatWidth = rect.width * scaleX;
                 const hatHeight = rect.height * scaleY;
 
                 ctx.save();
-                ctx.translate(hatX + hatWidth / 2, hatY + hatHeight / 2);
+                ctx.translate(hatX, hatY);
                 ctx.rotate((rotateSlider.value * Math.PI) / 180);
                 ctx.drawImage(santaHat, -hatWidth / 2, -hatHeight / 2, hatWidth, hatHeight);
                 ctx.restore();
