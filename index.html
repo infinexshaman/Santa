@@ -83,6 +83,14 @@
         button:hover {
             opacity: 0.8;
         }
+        #output {
+            text-align: center;
+            margin: 20px;
+        }
+        #output img {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
@@ -98,7 +106,8 @@
         <input type="range" id="sizeSlider" class="slider" min="0.1" max="5" step="0.1" value="1">
     </div>
     <button id="exportBtn">Export Image</button>
-    <canvas id="canvas" width="1000" height="1000" style="display:none;"></canvas>
+    <div id="output"></div>
+    <canvas id="canvas" width="400" height="400" style="display:none;"></canvas>
 
     <script>
         const imageUpload = document.getElementById('imageUpload');
@@ -108,6 +117,7 @@
         const canvas = document.getElementById('canvas');
         const rotateSlider = document.getElementById('rotateSlider');
         const sizeSlider = document.getElementById('sizeSlider');
+        const output = document.getElementById('output');
         let imageURL = '';
 
         imageUpload.addEventListener('change', (e) => {
@@ -206,10 +216,10 @@
                 ctx.drawImage(santaHat, -hatWidth / 2, -hatHeight / 2, hatWidth, hatHeight);
                 ctx.restore();
 
-                const link = document.createElement('a');
-                link.download = 'profile_with_santa_hat.png';
-                link.href = canvas.toDataURL('image/png', 1.0);
-                link.click();
+                const resultImage = new Image();
+                resultImage.src = canvas.toDataURL('image/png', 1.0);
+                output.innerHTML = ''; // Clear previous output
+                output.appendChild(resultImage);
             };
             img.src = imageURL;
         });
